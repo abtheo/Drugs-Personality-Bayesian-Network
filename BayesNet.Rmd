@@ -2,9 +2,27 @@
 title: "Drug Consumption & Personality Types"
 output: html_notebook
 ---
+<hr/>
+Bayesian statistics, armchair psychology, and a whole load of drugs. Move over Sigmund Freud.
 
-<h2>Dependencies</h2>
-```{r message=FALSE, warning=FALSE}
+
+<h2>Dataset Description</h2>
+
+The dataset contains records for 1885 respondents. For each respondent 12 attributes are known: Personality measurements which include NEO-FFI-R (neuroticism, extraversion, openness to experience, agreeableness, and conscientiousness), BIS-11 (impulsivity), and ImpSS (sensation seeking), level of education, age, gender, country of residence and ethnicity. All input attributes are originally categorical and are quantified. After quantification values of all input features can be considered as real-valued. In addition, participants were questioned concerning their use of 18 legal and illegal drugs (alcohol, amphetamines, amyl nitrite, benzodiazepine, cannabis, chocolate, cocaine, caffeine, crack, ecstasy, heroin, ketamine, legal highs, LSD, methadone, mushrooms, nicotine and volatile substance abuse and one fictitious drug (Semeron) which was introduced to identify over-claimers. For each drug they have to select one of the answers: never used the drug, used it over a decade ago, or in the last decade, year, month, week, or day.
+Database contains 18 classification problems. Each of independent label variables contains seven classes: "Never Used", "Used over a Decade Ago", "Used in Last Decade", "Used in Last Year", "Used in Last Month", "Used in Last Week", and "Used in Last Day".
+
+
+Detailed description of database and process of data quantification are presented in E. Fehrman, A. K. Muhammad, E. M. Mirkes, V. Egan and A. N. Gorban, "The Five Factor Model of personality and evaluation of drug consumption risk.," arXiv, 2015.
+
+
+
+<i>Dataset available at: http://archive.ics.uci.edu/ml/datasets/Drug+consumption+%28quantified%29#</i>
+
+```{r Dependencies, message=FALSE, warning=FALSE, include=FALSE}
+install.packages("remotes")
+remotes::install_github("jtextor/bayesianNetworks")
+library( bayesianNetworks )
+
 library(tools)
 install.packages("bnlearn")
 library( bnlearn )
@@ -14,28 +32,59 @@ install.packages("dplyr")
 library(dplyr)
 library(tidyr)
 
-install.packages("remotes")
-remotes::install_github("jtextor/bayesianNetworks")
-library( bayesianNetworks )
+
+install.packages('dagitty')
+library(dagitty)
+install.packages('ggplot2')
+library(ggplot2)
+install.packages("ggridges")
+library(ggridges)
 ```
 
-
-
-<h2>Import Dataset
+<h2>Import Dataset</h2>
+<hr/>
 ```{r}
 # Import the data and look at the first six rows
 df <- read_csv("drug_consumption.csv")
+#,col_types=paste("i", strrep("f",31),sep="")
 head(df)
 ```
-<h2>Occurence Table</h2>
+<h1>Exploratory Data Analysis</h1>
+<hr/>
+First off, let's get to know our dataset a little better. Of particular importance when working with Bayesian statistics is to investigate the number of classes per feature. Each class increases the number of model parameters, but moreover, we must ensure a sufficient number of samples are available in each case. When we lack samples, as often with the Personality Trait features, we can mitigate group classes up to a higher aggregation level.
+
+<h2>Occurrence Table</h2>  
+Quick example, print the number of occurrences of each class for a couple of the features. Obviously the more classes a feature has, the fewer occurrences there will be per class, roughly following a Gaussian distribution.
 ```{r}
-head(expand(df,Gender,Age,Country))
+sapply(df[c("Gender","Age", "Openness")], ftable)
 ```
+<h2>Kernel Density Estimation</h2>
+We can plot an estimated probability density function by fitting a Gaussian kernel to each observation. Using ggridges package for a nice way to glance over the distribution of many features at a time.
+```{r}
+df %>% 
+  ggplot(aes(Impulsiveness, as.factor(Alcohol))) +
+  geom_density_ridges(alpha = 0.5, bandwidth = 0.18, fill = "red") +
+  labs(y="Alcohol Use", title = "Alcohol Use vs. Impulsiveness")  +
+  theme_ridges(center_axis_labels=TRUE, grid=FALSE)
+
+df %>% 
+  ggplot(aes(Openness, as.factor(Cannabis))) +
+  geom_density_ridges(alpha = 0.5, bandwidth = 0.18, fill = "green") +
+  labs(y = "Cannabis Use", title = "Cannabis Use vs. Openness")  +
+  theme_ridges(center_axis_labels=TRUE, grid=FALSE)
+
+```
+
+
+<h1>Fitting Models from Data</h1>
+The connections present in a Bayesian Network drawn from the dataset can lend insights into the   relationships between variables. Note that taking different subsets of features will result in starkly different graphs, often causing relationships between specific nodes to invert or disappear. This limits the investigative usefulness of such a model, however we believe it still holds some informative value. To mitigate these problems, we split our features into rigid semantic groups in the section below.
+
+We will ultimately define a custom network configuration, and encode causal direction according to our own logical determinations about the reality of the situation, rather than naively trusting our data.
 
 ```{r}
 df <- read_csv("drug_consumption.csv")
 #Take a subset of the data for a smaller example network
-cols <- c("Gender","Age", "Ecstacy", "Extraversion")
+cols <- c("Age","Ecstacy", "Extraversion")
 data <- df[cols]
 #data[cols] <- lapply(df[cols], factor)
 #Aggregate personality value levels
@@ -46,14 +95,46 @@ data <- df[cols]
 smp_size <- floor(0.75 * nrow(data))
 train_ind <- sample(seq_len(nrow(data)), size = smp_size)
 
-train <- data[train_ind, ]
-test <- data[-train_ind, ]
+train_data <- data[train_ind, ]
+test_data <- data[-train_ind, ]
 
-fit <-pc.stable(train)
+fit <-pc.stable(train_data)
 plot(fit)
 
 
 ```
+<h2>Semantic Segregation</h2>
+There are three clearly distinct categories of feature found within our dataset:
+
+  <ul>
+    <li>
+      Facts: we wish to condition our model on these variables. We know there is no causal relationship between the  other two categories which will influence these variables. Conversely, they will likely have an influence on the majority of variables from the other two categories, so adjusting for them will be necessary.
+    </li>
+    <li>
+      Personalities: observations which are the focus of this project. 
+    </li>
+    <li>
+      Drugs:
+    </li>
+  </ul>
+
+
+<h3>Facts</h3>
+```{r}
+facts = c("Age",
+           "Gender",
+           "Country",
+           "Ethnicity",
+           "Education")
+
+fit <-pc.stable(df[facts])
+plot(fit)
+```
+These results seem sensible. Age, Gender & Ethnicity all have no parent nodes as we'd hope.
+
+However, there do seem to be extraneous relationships being drawn; in particular, Country counter-intuitively appears to be the child of every other node.
+
+<h3>Personalities</h3>
 ```{r}
 personalities = c("Extraversion", 
                   "Neuroticism", 
@@ -66,7 +147,10 @@ personalities = c("Extraversion",
 
 fit <-pc.stable(df[personalities])
 plot(fit)
+```
 
+<h3>Drugs</h3>
+```{r}
 drugs = c("Alcohol",
           "Amphetamines",
           "AmylNitrate",
@@ -90,33 +174,10 @@ drugs = c("Alcohol",
 fit <-pc.stable(df[drugs])
 plot(fit)
 ```
+Wow, that's a fair few connections! 
 
 
-```{r}
-sapply(data[,-1], ftable)
-```
-
-
-```{r}
-# p1 <- foo %>% 
-#   ggplot(aes(mean, as.factor(year))) +
-#   geom_density_ridges(alpha = 0.5, bandwidth = 0.08, fill = "blue") +
-#   scale_x_continuous(labels = scales::percent) +
-#   theme_hc() +
-#   theme(legend.position = "none") +
-#   labs(x = "", y = "", title = "Percentage of zeros per year")
-```
-
-
-```{r}
-# Use `anti_join()` to determine which observations are missing
-# all <- fruits %>% expand(type, size, year)
-# all
-# all %>% dplyr::anti_join(fruits)
-```
-
-
-<h2>Occurence Table</h2>
+<h1>Bayesian Network</h1>
 ```{r}
 testImplications <- function( covariance.matrix, sample.size ){
 	library(ggm)
@@ -321,8 +382,6 @@ data.frame( implication=unlist(lapply(implications,tos)),
 ```
 
 ```{r}
-install.packages('dagitty')
-library(dagitty)
 
 graph <- dagitty('
 dag {
@@ -490,9 +549,8 @@ SensationSeeking -> VSA
 ')
 
 ```
-<h1> PLot it</h1>
+<h2> Plot it</h2>
 ```{r}
-
 plot(graph)
 ```
 ```{r}
