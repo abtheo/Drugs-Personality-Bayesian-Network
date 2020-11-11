@@ -7,7 +7,7 @@ Bayesian statistics, armchair psychology, and a whole load of drugs. Move over S
 
 
 <h2>Dataset Description</h2>
-
+<hr/>
 The dataset contains records for 1885 respondents. For each respondent 12 attributes are known: Personality measurements which include NEO-FFI-R (neuroticism, extraversion, openness to experience, agreeableness, and conscientiousness), BIS-11 (impulsivity), and ImpSS (sensation seeking), level of education, age, gender, country of residence and ethnicity. All input attributes are originally categorical and are quantified. After quantification values of all input features can be considered as real-valued. In addition, participants were questioned concerning their use of 18 legal and illegal drugs (alcohol, amphetamines, amyl nitrite, benzodiazepine, cannabis, chocolate, cocaine, caffeine, crack, ecstasy, heroin, ketamine, legal highs, LSD, methadone, mushrooms, nicotine and volatile substance abuse and one fictitious drug (Semeron) which was introduced to identify over-claimers. For each drug they have to select one of the answers: never used the drug, used it over a decade ago, or in the last decade, year, month, week, or day.
 Database contains 18 classification problems. Each of independent label variables contains seven classes: "Never Used", "Used over a Decade Ago", "Used in Last Decade", "Used in Last Year", "Used in Last Month", "Used in Last Week", and "Used in Last Day".
 
@@ -19,11 +19,11 @@ Detailed description of database and process of data quantification are presente
 <i>Dataset available at: http://archive.ics.uci.edu/ml/datasets/Drug+consumption+%28quantified%29#</i>
 
 ```{r Dependencies, message=FALSE, warning=FALSE, include=FALSE}
+library(tools)
 install.packages("remotes")
 remotes::install_github("jtextor/bayesianNetworks")
 library( bayesianNetworks )
 
-library(tools)
 install.packages("bnlearn")
 library( bnlearn )
 library(readr)
@@ -39,13 +39,17 @@ install.packages('ggplot2')
 library(ggplot2)
 install.packages("ggridges")
 library(ggridges)
+
+install.packages('Hmisc')
+library(Hmisc)
 ```
 
 <h2>Import Dataset</h2>
 <hr/>
-```{r}
+```{r message=FALSE}
 # Import the data and look at the first six rows
 df <- read_csv("drug_consumption.csv")
+df$ID <- NULL
 #,col_types=paste("i", strrep("f",31),sep="")
 head(df)
 ```
@@ -53,13 +57,33 @@ head(df)
 <hr/>
 First off, let's get to know our dataset a little better. Of particular importance when working with Bayesian statistics is to investigate the number of classes per feature. Each class increases the number of model parameters, but moreover, we must ensure a sufficient number of samples are available in each case. When we lack samples, as often with the Personality Trait features, we can mitigate group classes up to a higher aggregation level.
 
-<h2>Occurrence Table</h2>  
+<h2>Frequency Table</h2>  
 Quick example, print the number of occurrences of each class for a couple of the features. Obviously the more classes a feature has, the fewer occurrences there will be per class, roughly following a Gaussian distribution.
 ```{r}
 sapply(df[c("Gender","Age", "Openness")], ftable)
 ```
+<h2>Histogram</h2>
+For the more visually inclined, the same information can be better presented by plotting histograms of each feature.
+
+```{r}
+#Found a prettier one!
+#hist.data.frame(df, color="darkmagenta")
+
+
+par(mfrow = c(2, 3), mar = c(4, 2, 2, 2))
+for (var in colnames(df)) {
+
+   x = as.numeric(unlist(df[, var]))
+   hist(x, prob = TRUE, xlab = var, ylab = "", main = "", col = "ivory")
+   lines(density(x, bw=0.5), lwd = 2, col = "tomato")
+   curve(dnorm(x, mean = mean(x), sd = sd(x)), from = min(x), to = max(x),
+     add = TRUE, lwd = 2, col = "steelblue")
+}
+```
+
+
 <h2>Kernel Density Estimation</h2>
-We can plot an estimated probability density function by fitting a Gaussian kernel to each observation. Using ggridges package for a nice way to glance over the distribution of many features at a time.
+We can plot an estimated probability density function by fitting a Gaussian kernel to each observation. Using ggridges package for a nice way to glance over the distribution of many feature combinations at a time.
 ```{r}
 df %>% 
   ggplot(aes(Impulsiveness, as.factor(Alcohol))) +
@@ -86,21 +110,25 @@ df <- read_csv("drug_consumption.csv")
 #Take a subset of the data for a smaller example network
 cols <- c("Age","Ecstacy", "Extraversion")
 data <- df[cols]
-#data[cols] <- lapply(df[cols], factor)
+data[cols] <- lapply(df[cols], factor)
 #Aggregate personality value levels
 
 #data$Extraversion <- cut(df$Extraversion, breaks=4, labels=seq_len(4))
 
 #Split train-test
-smp_size <- floor(0.75 * nrow(data))
-train_ind <- sample(seq_len(nrow(data)), size = smp_size)
+#smp_size <- floor(0.75 * nrow(data))
+#train_ind <- sample(seq_len(nrow(data)), size = smp_size)
 
-train_data <- data[train_ind, ]
-test_data <- data[-train_ind, ]
+#train_data <- data[train_ind, ]
+#test_data <- data[-train_ind, ]
 
-fit <-pc.stable(train_data)
+#Fit network on data subset
+fit <-pc.stable(df[cols])
 plot(fit)
+fit
 
+#
+ci.test(x=data$Age, y=data$Ecstacy, z=data$Extraversion, test="x2")
 
 ```
 <h2>Semantic Segregation</h2>
@@ -111,7 +139,7 @@ There are three clearly distinct categories of feature found within our dataset:
       Facts: we wish to condition our model on these variables. We know there is no causal relationship between the  other two categories which will influence these variables. Conversely, they will likely have an influence on the majority of variables from the other two categories, so adjusting for them will be necessary.
     </li>
     <li>
-      Personalities: observations which are the focus of this project. 
+      Personalities: 
     </li>
     <li>
       Drugs:
@@ -134,8 +162,29 @@ These results seem sensible. Age, Gender & Ethnicity all have no parent nodes as
 
 However, there do seem to be extraneous relationships being drawn; in particular, Country counter-intuitively appears to be the child of every other node.
 
-<h3>Personalities</h3>
+Let's test it out.
 ```{r}
+chisq <- 0 ; out <- 0
+cols = colnames(df)
+df[cols] <- lapply(df[cols], factor)
+for( x in unique(df$Gender) )
+{
+  tst <-chisq.test( df$Ethnicity[df$Age==x], df$Country[df$Age==x] )
+  chisq <- chisq+tst$statistic
+  out <- out + tst$parameter
+}
+chisq
+out
+1 - pchisq(chisq, out)
+```
+
+```{r}
+impliedConditionalIndependencies(fit)
+dagitty::localTests(fit, df[facts], type="cis.chisq")
+```
+
+<h3>Personalities</h3>
+```{r warning=FALSE}
 personalities = c("Extraversion", 
                   "Neuroticism", 
                   "Openness",
@@ -150,7 +199,7 @@ plot(fit)
 ```
 
 <h3>Drugs</h3>
-```{r}
+```{r warning=FALSE}
 drugs = c("Alcohol",
           "Amphetamines",
           "AmylNitrate",
@@ -172,9 +221,22 @@ drugs = c("Alcohol",
           "VSA")
 
 fit <-pc.stable(df[drugs])
-plot(fit)
+plot
+fit
 ```
-Wow, that's a fair few connections! 
+Wow, that's a fair few connections! Let's reduce the number of levels and see how that influences the network structure. We will try reducing to a binary class of 'User' vs. 'Non-user', with the cut-off being that you must have used a given drug within the last year.
+```{r}
+reduce_drug_levels <- function(drug_col)
+{
+  return(ifelse(drug_col < 3, 0, 1))
+}
+drugs_user_levels <- as.data.frame(apply(X=df[drugs], MARGIN=2, FUN=reduce_drug_levels))
+
+fit <-pc.stable(drugs_user_levels)
+plot(fit)
+
+fit
+```
 
 
 <h1>Bayesian Network</h1>
@@ -574,5 +636,5 @@ localTests(graph, df2)
 
 
 ```{r}
-summary(lm( Ecstacy~Agreeableness,as.data.frame(scale(df2)) ) )
+plot(lm( Ecstacy~Agreeableness,as.data.frame(scale(df)) ) )
 ```
