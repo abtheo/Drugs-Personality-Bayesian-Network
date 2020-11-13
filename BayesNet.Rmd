@@ -165,11 +165,9 @@ However, there do seem to be extraneous relationships being drawn; in particular
 Let's test it out.
 ```{r}
 chisq <- 0 ; out <- 0
-cols = colnames(df)
-df[cols] <- lapply(df[cols], factor)
-for( x in unique(df$Gender) )
+for( x in unique(df$Age) )
 {
-  tst <-chisq.test( df$Ethnicity[df$Age==x], df$Country[df$Age==x] )
+  tst <-chisq.test( df$Education[df$Age==x], df$Country[df$Age==x] )
   chisq <- chisq+tst$statistic
   out <- out + tst$parameter
 }
@@ -180,7 +178,7 @@ out
 
 ```{r}
 impliedConditionalIndependencies(fit)
-dagitty::localTests(fit, df[facts], type="cis.chisq")
+#dagitty::localTests(fit, df[drugs], type="cis.chisq")
 ```
 
 <h3>Personalities</h3>
@@ -245,202 +243,298 @@ testImplications <- function( covariance.matrix, sample.size ){
 	library(ggm)
 	tst <- function(i){ pcor.test( pcor(i,covariance.matrix), length(i)-2, sample.size )$pvalue }
 tos <- function(i){ paste(i,collapse=" ") }
-implications <- list(c("Neuroticism","Extraversion"),
-		c("Neuroticism","Openness"),
-		c("Neuroticism","Agreeableness"),
-		c("Neuroticism","Conscientiousness"),
-		c("Neuroticism","Impulsiveness"),
-		c("Neuroticism","SensationSeeking"),
-		c("Extraversion","Openness"),
-		c("Extraversion","Agreeableness"),
-		c("Extraversion","Conscientiousness"),
-		c("Extraversion","Impulsiveness"),
-		c("Extraversion","SensationSeeking"),
-		c("Openness","Agreeableness"),
-		c("Openness","Conscientiousness"),
-		c("Openness","Impulsiveness"),
-		c("Openness","SensationSeeking"),
-		c("Agreeableness","Conscientiousness"),
-		c("Agreeableness","Impulsiveness"),
-		c("Agreeableness","SensationSeeking"),
-		c("Conscientiousness","Impulsiveness"),
-		c("Conscientiousness","SensationSeeking"),
-		c("Impulsiveness","SensationSeeking"),
-		c("Alcohol","Amphetamines","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","AmylNitrate","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Benzos","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Caffeine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Cannabis","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Chocolate","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Cocaine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Crack","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Alcohol","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","AmylNitrate","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Benzos","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Caffeine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Cannabis","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Chocolate","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Cocaine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Crack","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Amphetamines","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Benzos","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Caffeine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Cannabis","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Chocolate","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Cocaine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Crack","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("AmylNitrate","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Caffeine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Cannabis","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Chocolate","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Cocaine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Crack","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Benzos","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Cannabis","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Chocolate","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Cocaine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Crack","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Caffeine","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Chocolate","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Cocaine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Crack","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cannabis","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Cocaine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Crack","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Chocolate","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","Crack","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Cocaine","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","Ecstacy","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Crack","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","Heroin","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ecstacy","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Heroin","Ketamine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Heroin","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Heroin","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Heroin","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Heroin","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Heroin","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Heroin","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Heroin","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ketamine","LegalHighs","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ketamine","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ketamine","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ketamine","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ketamine","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ketamine","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Ketamine","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LegalHighs","LSD","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LegalHighs","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LegalHighs","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LegalHighs","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LegalHighs","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LegalHighs","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LSD","Meth","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LSD","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LSD","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LSD","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("LSD","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Meth","Mushrooms","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Meth","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Meth","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Meth","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Mushrooms","Nicotine","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Mushrooms","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Mushrooms","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Nicotine","Semeron","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Nicotine","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"),
-		c("Semeron","VSA","Agreeableness","Neuroticism","Conscientiousness","Openness","SensationSeeking","Impulsiveness","Extraversion"))
-data.frame( implication=unlist(lapply(implications,tos)),
+implications <- list(c("Age","Alcohol","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking","Agreeableness"),
+		c("Age","Amphetamines","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","AmylNitrate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Benzos","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Caffeine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Cannabis","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Chocolate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Cocaine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Country"),
+		c("Age","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Ethnicity"),
+		c("Age","Gender"),
+		c("Age","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Age","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Amphetamines","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","AmylNitrate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Benzos","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Caffeine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Cannabis","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Chocolate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Cocaine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Country","Agreeableness","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness"),
+		c("Alcohol","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Education","Agreeableness","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness"),
+		c("Alcohol","Ethnicity","Agreeableness","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness"),
+		c("Alcohol","Gender","Agreeableness","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness"),
+		c("Alcohol","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Alcohol","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","AmylNitrate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Benzos","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Caffeine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Cannabis","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Chocolate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Cocaine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Country","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Amphetamines","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Amphetamines","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Amphetamines","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Amphetamines","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Amphetamines","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Benzos","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Caffeine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Cannabis","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Chocolate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Cocaine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Country","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("AmylNitrate","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("AmylNitrate","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("AmylNitrate","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("AmylNitrate","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("AmylNitrate","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Caffeine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Cannabis","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Chocolate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Cocaine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Country","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Benzos","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Benzos","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Benzos","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Benzos","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Benzos","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Cannabis","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Chocolate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Cocaine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Country","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Caffeine","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Caffeine","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Caffeine","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Caffeine","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Caffeine","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Chocolate","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Cocaine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Country","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Cannabis","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Cannabis","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Cannabis","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Cannabis","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cannabis","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Cocaine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Country","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Chocolate","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Chocolate","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Chocolate","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Chocolate","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Chocolate","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","Country","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Cocaine","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Cocaine","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Cocaine","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Cocaine","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Cocaine","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","Crack","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","Gender"),
+		c("Country","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Country","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","Ecstacy","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Crack","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Crack","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Crack","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Crack","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","Education","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Ecstacy","Ethnicity","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Ecstacy","Gender","SensationSeeking","Openness","Neuroticism","Impulsiveness","Extraversion","Conscientiousness","Agreeableness"),
+		c("Ecstacy","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ecstacy","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","Ethnicity","Country"),
+		c("Education","Gender"),
+		c("Education","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Education","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","Gender"),
+		c("Ethnicity","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ethnicity","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","Heroin","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Gender","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Heroin","Ketamine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Heroin","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Heroin","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Heroin","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Heroin","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Heroin","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Heroin","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Heroin","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ketamine","LSD","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ketamine","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ketamine","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ketamine","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ketamine","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ketamine","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Ketamine","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LSD","LegalHighs","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LSD","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LSD","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LSD","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LSD","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LSD","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LegalHighs","Meth","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LegalHighs","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LegalHighs","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LegalHighs","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("LegalHighs","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Meth","Mushrooms","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Meth","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Meth","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Meth","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Mushrooms","Nicotine","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Mushrooms","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Mushrooms","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Nicotine","Semeron","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Nicotine","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"),
+		c("Semeron","VSA","Agreeableness","Conscientiousness","Extraversion","Impulsiveness","Neuroticism","Openness","SensationSeeking"))
+	data.frame( implication=unlist(lapply(implications,tos)),
 		pvalue=unlist( lapply( implications, tst ) ) )
 
 }
+```
+
+```{r}
+cov_df <- df
+cov_df$ID <- NULL
+cov_matrix = cov(cov_df, cov_df)
+
+col<- colorRampPalette(c("blue", "white", "red"))(20)
+heatmap(cov_matrix, col=col, symm=TRUE)
+```
+
+```{r}
+implied <- testImplications(cov_matrix, length(cov_df))
+#[implied$pvalue > alpha,]
+implied[rev(order(implied$pvalue)),]
 ```
 
 ```{r}
@@ -448,32 +542,40 @@ data.frame( implication=unlist(lapply(implications,tos)),
 graph <- dagitty('
 dag {
 bb="0,0,1,1"
+Age [adjusted,pos="0.194,0.095"]
 Agreeableness [exposure,pos="0.265,0.362"]
 Alcohol [outcome,pos="0.141,0.720"]
 Amphetamines [outcome,pos="0.089,0.665"]
 AmylNitrate [outcome,pos="0.669,0.667"]
+Background [latent,pos="0.323,0.199"]
 Benzos [outcome,pos="0.187,0.661"]
 Caffeine [outcome,pos="0.228,0.721"]
 Cannabis [outcome,pos="0.267,0.656"]
 Chocolate [outcome,pos="0.570,0.700"]
 Cocaine [outcome,pos="0.596,0.622"]
 Conscientiousness [exposure,pos="0.432,0.353"]
-Crack [outcome,pos="0.854,0.669"]
+Country [adjusted,pos="0.313,0.078"]
+Crack [outcome,pos="0.797,0.609"]
 Ecstacy [outcome,pos="0.400,0.703"]
+Education [adjusted,pos="0.262,0.093"]
+Ethnicity [adjusted,pos="0.379,0.078"]
 Extraversion [exposure,pos="0.759,0.346"]
+Gender [adjusted,pos="0.436,0.128"]
 Heroin [outcome,pos="0.315,0.710"]
 Impulsiveness [exposure,pos="0.682,0.348"]
 Ketamine [outcome,pos="0.487,0.687"]
-LSD [outcome,pos="0.789,0.673"]
+LSD [outcome,pos="0.761,0.668"]
 LegalHighs [outcome,pos="0.517,0.621"]
-Meth [outcome,pos="0.913,0.661"]
-Mushrooms [outcome,pos="0.958,0.659"]
+Meth [outcome,pos="0.847,0.674"]
+Mushrooms [outcome,pos="0.882,0.607"]
 Neuroticism [exposure,pos="0.346,0.363"]
-Nicotine [outcome,pos="0.740,0.669"]
+Nicotine [outcome,pos="0.710,0.618"]
 Openness [exposure,pos="0.514,0.356"]
 Semeron [outcome,pos="0.439,0.638"]
 SensationSeeking [exposure,pos="0.594,0.354"]
 VSA [outcome,pos="0.357,0.653"]
+Age -> Background
+Age -> Education
 Agreeableness -> Alcohol
 Agreeableness -> Amphetamines
 Agreeableness -> AmylNitrate
@@ -493,6 +595,13 @@ Agreeableness -> Mushrooms
 Agreeableness -> Nicotine
 Agreeableness -> Semeron
 Agreeableness -> VSA
+Background -> Agreeableness
+Background -> Conscientiousness
+Background -> Extraversion
+Background -> Impulsiveness
+Background -> Neuroticism
+Background -> Openness
+Background -> SensationSeeking
 Conscientiousness -> Alcohol
 Conscientiousness -> Amphetamines
 Conscientiousness -> AmylNitrate
@@ -512,6 +621,11 @@ Conscientiousness -> Mushrooms
 Conscientiousness -> Nicotine
 Conscientiousness -> Semeron
 Conscientiousness -> VSA
+Country -> Background
+Country -> Education
+Education -> Background
+Ethnicity -> Background
+Ethnicity -> Country
 Extraversion -> Alcohol
 Extraversion -> Amphetamines
 Extraversion -> AmylNitrate
@@ -531,6 +645,7 @@ Extraversion -> Mushrooms
 Extraversion -> Nicotine
 Extraversion -> Semeron
 Extraversion -> VSA
+Gender -> Background
 Impulsiveness -> Alcohol
 Impulsiveness -> Amphetamines
 Impulsiveness -> AmylNitrate
@@ -624,17 +739,65 @@ impliedConditionalIndependencies(graph)
 
 
 ```{r}
-#chisq.test(df$Agreeableness, df$Ecstacy)
+alpha <- 0.05
+results <- localTests(graph, cov_df)
 
-df2 <- df[,7:32]
+results[results$p.value > alpha, ]
 
-df2[] <- lapply( df2, factor)
+plotLocalTestResults(results)
 
-localTests(graph, df2)
 
+results[order(results$p.value),]
+```
+
+```{r}
+paths(graph, "Age", "Ecstacy")
 ```
 
 
 ```{r}
 plot(lm( Ecstacy~Agreeableness,as.data.frame(scale(df)) ) )
 ```
+
+
+```{r}
+install.packages("lavaan")
+library(lavaan)
+```
+
+```{r}
+dr_df <- cov_df
+lvsem <-toString(graph,"lavaan")
+lvsem.fit <- sem(lvsem3,cov_df)
+
+summary(lvsem.fit)
+```
+```{r}
+cov_df$Background <-predict(lvsem.fit)
+
+
+net <-model2network(toString(graph,"bnlearn"))
+fit <-bn.fit( net, as.data.frame(cov_df) )
+
+for (drug in drugs)
+{
+  yhat <- predict(fit, node=drug, data=cov_df,method="bayes-lw")
+  print(drug) 
+  print(mean((cov_df[[drug]] - yhat)^2)^0.5)
+}
+
+
+#predicted.read <-predict(lvsem.fit,node="Background",data=,method="bayes-lw")
+#plot(hsb2[,"read"],predicted.read) 
+```
+
+```{r}
+
+summary(ddd)
+```
+
+
+
+
+
+
